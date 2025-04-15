@@ -9,6 +9,7 @@ with open('card_information.csv') as card_info_file:
     next(reader) #skip header
     for row in reader:
         card, value = row #card = row[0], value = row[1]
-        card_values[card] = int(value)  
+        card_deck[card] = int(value)  
 
-print(card_deck)
+#print(card_deck)
+
