@@ -1,12 +1,11 @@
-#------------------------------------------------------------------------------------
-# RULES:
+BLACKJACK RULES:
 # Get as close to 21 without going over
 # 6 standard 52 decks are shuffled together 312 cards total
 # cards are dealt from the bottom
 # when ~60/75 cards remain in the stack the cards are shuffled
 # Card values ace = 1/11, face cards = 10, other cards is pip
 
-# The game:
+The game:
 # SETUP
 # Dealer gives players and themself 1 face up
 # Dealer gives players face up, dealer face down
@@ -29,8 +28,8 @@
 # DOUBLING DOWN
 # if orignial 2 cards == 9/10/11 players can double their bet
 # they will receive 1 card face down that will be turned when betting is finished
-#------------------------------------------------------------------------------------
 
+#------------------------------------------------------------------------------------
 
 GAME IDEAS
 # See how far you can get with a given amount
@@ -39,3 +38,34 @@ GAME IDEAS
 # Place bets
 # Set up game with visual 
 # Option select (hit, stand, split*, double*)
+
+#Race against increasing min balance?
+
+
+#------------------------------------------------------------------------------------
+
+Software side?
+Step 1 open menu with options:
+    - 1. Play game 
+    Game options and input player count
+    - 2. Rules 
+    Display basic rules
+    - 3. Highscores
+    Display list of 10 highest scoring players and date for each game mode
+    - 4. Quit game 
+    quits game
+
+Step 2 Play game 
+    1. Select game type
+    Regular blackjack or race blackjack
+    2. Select amount of players 
+    user inputs amount of players
+    ask for player names 
+
+Step 3 Game starts
+    - Players bet, get cards, play game, win/lose
+    - Do you want to play another round?
+    - yes/no
+        - yes = /\ step 3
+        - no = update highscore(s) & return main menu
+
