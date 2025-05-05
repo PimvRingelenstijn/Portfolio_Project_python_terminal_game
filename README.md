@@ -14,7 +14,7 @@ To play the game:
    
    git clone https://github.com/PimvRingelenstijn/Portfolio_Project_python_terminal_game.git
 
-3. Navigate to the project folder and run
+3. Navigate to the project folder and run main.py
    
    python main.py
 
