@@ -1,274 +1,187 @@
-import csv
-import random
+import json
 import time
 import os
+from terminal_message import terminal_message
+from blackjack import Blackjack
+from player import Player
 
-# open card info file and turn it into usable dictionary
-card_deck = {}
-with open("card_information.csv") as card_info_file:
-    reader = csv.reader(card_info_file)
-    next(reader) #skip header
-    for row in reader:
-        card, value = row #card = row[0], value = row[1]
-        card_deck[card] = int(value)  
-
-## open player info file and turn it into usable dictionary
-#players_info = {}
-#with open("player_highscores.csv") as players_info_file:
-#    reader = csv.reader(players_info_file)
-#    next(reader)
-#    for row in reader:
-#        player, scores = row #player = row[0], scores = row[1]
-#        players_info[player] = scores
-players_highscores = {}
-
-# create a list of 6 card decks & shuffle
-full_blackjack_stack = []
-for card in card_deck.keys():
-    for i in range(6):
-        full_blackjack_stack.append(card)
-random.shuffle(full_blackjack_stack)
-
-# method for clean terminal messages
-def terminal_message(message):
-    # Determine max scentence length
-    len_message = 0
-    split_message = message.split("\n")
-    for scentence in split_message:
-        if len_message < len(scentence):
-            len_message = len(scentence)
-    blank_line = "-" * len_message + "\n"
-    return "\n" + blank_line + message + "\n" + blank_line
-
-#Blackjack class & actions
-class Blackjack():
-    def __init__(self, player_list, game_type_int):
-        self.card_stack = full_blackjack_stack
-        self.discard_stack = []
-        self.rounds_counter = 0
-        self.minimum_card_stack_size = random.randint(60, 80) # minimum size of card stack before reshuffle
-        self.card_scores = {"2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8, "9": 9, "10": 10, "Jack": 10, "Queen": 10, "King": 10, "Ace": 11,}
-        if game_type_int == 1:
-            self.game_type = "regular"
-        elif game_type_int == 2:
-            self.game_type = "race"
-        else: self.game_type = "duel"
-        # create dict with balance, empty card list and card score for use during game
-        self.active_players = player_list
-        self.player_info = {"Dealer":{"Cards": [], "Card Score": 0}}
-        for i in player_list:
-            self.player_info[i] = {"Balance": 100, "Cards": [], "Card Score":0}
-        Blackjack.clean_terminal_message_input(self)
-    
-    def clean_terminal_message_input(self):
-        # line 1 is player name, 2/ 4/ 6 are blank lines, 3/5 are card info
-        self.game_state_message = ["", "", "", "", "", "",]
-    
-    def player_cards_output(self):
-        pass
-    
-    def game_state_terminal_message_output(self):
-        # clears terminal output
-        os.system('cls' if os.name == 'nt' else 'clear')
-        for player, info in self.player_info.items():
-            if player == "Dealer":
-                if info["Cards Score"] == "BLACKJACK!":
-                    self.dealer_blackjack = True
-                
-                           
-    
-    def betting(self):
-        # clears terminal output
-        os.system('cls' if os.name == 'nt' else 'clear')
-        # dict for keeping track of bets
-        self.active_bets = {}
-        print(terminal_message("It's time to place your bets!"))
-        time.sleep(0.5)
-        # Using while loop to make sure correct input can be found
-        player_index = 0
-        while player_index < len(self.active_players):
-            active_player = self.active_players[player_index]
-            ui_betting_amount = input(terminal_message("""Player {name}, you currently have ${money}.
-How much do you want to bet?""".format(name = active_player, money = self.player_info[active_player]["Balance"])))
-            # Catch non int inputs          
-            try:
-                ui_betting_amount_int = int(ui_betting_amount)
-            except: 
-                print("\nInvalid input!\n")
-                continue
-            # check betting size
-            if ui_betting_amount_int < 1:
-                print("\nInvalid input!\n")
-                continue
-            elif ui_betting_amount_int > self.player_info[active_player]["Balance"] or ui_betting_amount_int > 500: 
-                print("\nToo large bet!\n")
-                continue
-            # resolve betting amount & player index
-            self.player_info[active_player]["Balance"] -= ui_betting_amount_int
-            self.active_bets[active_player] = ui_betting_amount_int
-            player_index += 1
-    
-    def calculate_players_cards_scores(self):
-        for player, info in self.player_info.items():
-            for card in info["Cards"]:
-                card_info = card.split(" ")
-                info["Card Score"] += self.card_scores[card_info[0]]
-            if info["Card Score"] == 21:
-                info["Card Score"] = "BLACKJACK!"
-    
-    
-    def game_setup(self):
-        for i in range(2):
-            for player in self.player_info:
-                next_card = self.card_stack.pop()
-                self.discard_stack.append(next_card)
-                self.player_info[player]["Cards"].append(next_card)
-        Blackjack.calculate_players_cards_scores(self)
- 
-    def player_blackjack_payout(self):
-        pass
-    
-    def game_result(self):
-        pass
-    
-    def main_gameplay_loop(self):
-        self.rounds_counter += 1
-        self.dealer_blackjack = False
-        Blackjack.betting(self)
-        Blackjack.game_setup(self)
-        if self.dealer_blackjack:
-            pass
-    
-class Player():
-    def __init__(self, name):
-        basic_scores = {"Regular": 100, "Race": 100, "Duel": 100}
-        players_highscores[name] = basic_scores
-    
-    def welcome_message(self, name):
-        print("Welcome back {player}!".format(player = name))
-        
-    def highscore(self, name):
-        pass
-        
+if os.path.exists("player_highscores.json"):
+    # load in player highscores if any are present
+    with open("player_highscores.json", "r") as file:
+        player_highscores = json.load(file)
+    # if there is no score file make first dict
+else:
+    player_highscores = {}
 
 # Startup notification 
-print(terminal_message("Welcome to the game of Blackjack?"))
+os.system("cls" if os.name == "nt" else "clear")
+print(terminal_message("Welcome to a game of Blackjack!"))
 time.sleep(1.5)
-
 
 # While loop will repeat until user inputs 4 in menu
 # ui_* is short for user_input_*
 while True:
     # clears terminal output
-    os.system('cls' if os.name == 'nt' else 'clear')
+    os.system("cls" if os.name == "nt" else "clear")
     # User choice
-    return_to_main_menu = False
-    ui_menu = input(terminal_message("What do you want to do?\n\n1. Play Blackjack\n2. View Rules\n3. View Highscores\n4. Quit Game"))
+    ui_menu = input(terminal_message("What would you like to do?\n\n1. Play Blackjack\n2. View Rules\n3. View Highscores\n4. Quit Game", True))
     
     # catch non int inputs
     try:
         ui_menu_int = int(ui_menu)
     except:
-        print("\nInvalid input!\n")
+        x = input("Error: Invalid Input!")
         continue
     time.sleep(0.5)
 
     # If/else block after user input!
     if ui_menu_int == 1: #Play Blackjack
-        #create while loop to return to if invalid input
-        ui_game_type_int = 0
-        active_players = []
+        # create while loop to return to if invalid input
+        # create player list
+        current_players = []
         game_setup_menu = True
         
         #while input for game type selection and player count
         while game_setup_menu:
-            # clears terminal output
-            os.system('cls' if os.name == 'nt' else 'clear')
-            # ask game type input
-            ui_game_type = input(terminal_message("""Lets play a game of blackjack!\n\nWhat type of game do you want to play?\n1. Regular Blackjack
-2. Race against the House\n3. Blackjack Duel (Multiplayer only)\n4. Return To Main Menu"""))
-            # Check for int input
-            try:
-                ui_game_type_int = int(ui_game_type)
-            except:
-                print("\nInvalid input!\n")
-                continue
-            time.sleep(0.5)
-            if ui_game_type_int == 4:
-                return_to_main_menu = True
-                break
+            os.system("cls" if os.name == "nt" else "clear")        # clear terminal
             
             # ask amount of players input
-            ui_amount_of_players = input(terminal_message("How many players are there?\n(enter number of players)"))
+            ui_amount_of_players = input(terminal_message("How many players are there?\n(Max 6)", True))
+            
             # Check for int input
             try:
                 ui_amount_of_players_int = int(ui_amount_of_players)
             except:
-                print("\nInvalid input!\n")
+                x = input("Error: Invalid Input!")
                 continue
             time.sleep(0.5)
             
             # lel, had to be done
             if ui_amount_of_players_int == 69:
                 for i in range(10): 
-                    print("nice")
-                    time.sleep(0.1)
+                    print(terminal_message("nice"))
+                    time.sleep(0.3)
+                    continue
+            if ui_amount_of_players_int > 6:
+                x = input("Error: Too many players")
+                continue
 
-            
             # Add 1 single player
             if ui_amount_of_players_int == 1:
-                player_name = input(terminal_message("Welcome player! What is your name?"))
-                if player_name in players_highscores: 
+                player_name = input(terminal_message("Welcome player! What is your name?", True))
+                if player_name in player_highscores: 
                     Player.welcome_message(player_name)
-                else: Player(player_name)
-                active_players.append(player_name)            
+                else: Player(player_name, player_highscores)
+                current_players.append(player_name)            
             # add multiple players
             elif ui_amount_of_players_int > 1:
                 for player_num in range(1, ui_amount_of_players_int + 1):
-                    player_name = input(terminal_message("Welcome player {num}! What is your name?".format(num = player_num)))
-                    if player_name in players_highscores: 
+                    player_name = input(terminal_message("Welcome player {num}! What is your name?".format(num = player_num), True))
+                    if player_name in player_highscores: 
                         Player.welcome_message(player_name)
-                    else: Player(player_name)
-                    active_players.append(player_name)
+                    else: Player(player_name, player_highscores)
+                    current_players.append(player_name)
                     time.sleep(0.5)
             # check for negative players
             else:
-                print("\nInvalid Input!\n")
+                x = input("Error: Invalid Input!")
                 continue
             
             # stops game setup menu while loop
             game_setup_menu = False
-
-        # return to first while loop after game type input == 4
-        if return_to_main_menu:
-            continue
+        
+        Player.update_highscores(player_highscores)
         
         # this will be the real gameplay loop!
-        main_gameplay_loop = True
-        print(terminal_message("Lets get started!"))
-        time.sleep(1)
-        main_game = Blackjack(active_players, ui_game_type_int)
-        while main_gameplay_loop:
-            main_game.main_gameplay_loop()
+        main_gameplay_loop_outside = True
+        main_game = Blackjack(current_players)
+        while main_gameplay_loop_outside:
+            main_gameplay_loop_outside = main_game.main_gameplay_loop()
             
-            
-            
-
+        x = input(terminal_message("Thnx for playing!"))    
 
         
     elif ui_menu_int == 2: # View Rules
-        print("these are the rules")
+        os.system("cls" if os.name == "nt" else "clear")        # clear terminal
+        x = input(terminal_message("""---The Rules Of Blackjack---\n\n--Goal--\nGet a card score as close to 21 as possible.\nIf you go over 21, you bust and lose the round.
+\n--Card Values--\nNumber cards (2-10) = face value (10 = T)\nFace cards (J, Q, K) = 10 points\nAce (A) = 1 or 11 points (whichever is best)
+\n--Basic Round Structure--\n1. Betting\n    Each player sets a bet between $10 - $500\n2. Round Setup\n    Each player is dealt two cards face up\n    The dealer is dealt two cards, one face up and one face down (hole card)
+3. Player(s) turn\n    Each player can take one of 4 possible actions:\n    - Hit: Take another card\n    - Stand: Keep your current hand\n    If a players card score after setup is 9/10/11
+    - Double Down: Double your bet and take only 1 more card face down\n    If both cards of a player are of the same value\n    - Split Pair: Split the card pair and place an equal bet on the second set.
+      Both sets play individually for the current round.\n      If the split pair is aces, both sets take only 1 more card.\n4. Dealer Turn\n    After all player finish the dealer reveals their hole card
+    Dealer must hit until their card score is 17 or higher, after which the dealer stands\n    If dealer busts, all remaining players win\n
+--Round Ending--\nPlayer wins if:\n    Player gets blackjack (card score of first 2 cards equals 21) and dealer does not\n    Players card score is greater than dealers without going over 21
+    Dealer busts and player does not\nPlayer ties (push):\n     Player score is equal to dealers score\n
+--Resolve Betting--\nPlayer Blackjack: 3:2 ($10 bet = $25 return)\nPlayer Win: 1:1 ($10 bet = $20 return)\nPlayer Push: 1:0 ($10 bet = $10 return)\nPlayer Los: 0:0 ($10 bet = $0 return)
+\nPress Enter To Return To Main Menu""", True))
         
         
     elif ui_menu_int == 3: # View Highscores
-        print("These are the highscores")
         
         
+        player_max_score = {} 
+        player_max_round = {}
+        
+        if len(player_highscores) == 0:
+            print(terminal_message("Winning only matters while you are ahead.\nYour highest score will be the highest score you quit playing with, not the highest score you reach during a game!"))
+            x = input(terminal_message("There are currently no highscores recorded!\nPlay some rounds and return later!", True))
+            continue
+        
+        for player, info in player_highscores.items():
+            player_max_score[player] = info["Highscore"]
+            player_max_round[player] = info["Max Rounds"]
+        
+        sorted_max_score = dict(sorted(player_max_score.items(), key=lambda item: item[1], reverse=True))
+        sorted_max_round = dict(sorted(player_max_round.items(), key=lambda item: item[1], reverse=True))
+        
+        highscore_message = "These are the current Highscores:\n\n"
+        # highest score
+        if len(sorted_max_score) < 10:
+            set_sorted_max_score = {k: sorted_max_score[k] for k in list(sorted_max_score)[:len(sorted_max_score)]}
+        else:
+            set_sorted_max_score = {k: sorted_max_score[k] for k in list(sorted_max_score)[:10]}
+        highscore_message += "Highest Score:\n"
+        num = 1
+        for player, info in set_sorted_max_score.items():
+            highscore_message += f"-{num}- {player}: ${info}\n"
+            num += 1
+        
+        # max round
+        if len(sorted_max_round) < 10:
+            set_sorted_max_round = {k: sorted_max_round[k] for k in list(sorted_max_round)[:len(sorted_max_round)]}
+        else:
+            set_sorted_max_round = {k: sorted_max_round[k] for k in list(sorted_max_round)[:10]}
+        highscore_message += "\nHighest Round:\n"
+        num = 1
+        for player, info in set_sorted_max_round.items():
+            highscore_message += f"-{num}- {player}: Round {info}\n"
+            num += 1
+        
+        highscores_menu = True
+        while highscores_menu:
+            os.system("cls" if os.name == "nt" else "clear")
+            print(terminal_message("Winning only matters while you are ahead.\nYour highscore will be the highest score you quit playing with,\nnot the highest score you reach during a game!"))# clear terminal
+            print(terminal_message(highscore_message))
+            ui_highscore = input(terminal_message("Is there any specific player highscore you want to look up?\n\nEnter player name for player highscore\nPress Enter to return to main menu",True))
+            if ui_highscore == "":
+                highscores_menu = False
+            elif ui_highscore in player_highscores:
+                player = ui_highscore
+                highscore = player_highscores[player]["Highscore"]
+                rounds = player_highscores[player]["Max Rounds"]
+                x = input(terminal_message(f"The highscores of {player} are:\nHighest Score: ${highscore}\nHighest Round: {rounds}"))
+            else:
+                x = input(terminal_message(f"Error: Player = {ui_highscore} = not found!\nPlease try again!"))
+
     elif ui_menu_int == 4: # Quit Game
-        print("Thanks for playing!")
+        os.system("cls" if os.name == "nt" else "clear")        # clear terminal
+        print(terminal_message("Thanks for playing!"))
+        time.sleep(2)
+        os.system("cls" if os.name == "nt" else "clear")
         break#exit while loop
+    
         
-    else: # \nInvalid input returns to start main menu while loop
-        print("\nInvalid input!\n")
+    else: # Invalid input returns to start main menu while loop
+        x = input("Error: Invalid Input!")
 
 
