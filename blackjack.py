@@ -834,7 +834,7 @@ class Blackjack():
         # skip if no new highscores
         if self.bj_player_info[player]["Balance"] <= player_highscores[player]["Highscore"] and self.bj_player_info[player]["Highest Round"] <= player_highscores[player]["Max Rounds"]:
             outro_message += "!\n\nSee you next time!"
-            print(terminal_message(outro_message))
+            x = input(terminal_message(outro_message))
         else:
             outro_message += ", and congratulations! You've got a new record!!!"
             print(terminal_message(outro_message))
