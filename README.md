@@ -57,3 +57,8 @@ Here’s what I wanted to showcase:
 🧠 Problem Solving – Challenging myself to build a “complex” and bug-free terminal game from scratch
 
 It's not perfect, but it's functional, fun, and the best representation of what I can do right now. 
+
+## Additional info
+This project was finished on 05-05-2025.
+
+Bugfixed could be made at a later date, but no major changes will be made to the code
