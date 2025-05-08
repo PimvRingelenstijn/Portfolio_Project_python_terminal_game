@@ -13,10 +13,12 @@ if os.path.exists("player_highscores.json"):
 else:
     player_highscores = {}
 
+
 # Startup notification 
 os.system("cls" if os.name == "nt" else "clear")
 print(terminal_message("Welcome to a game of Blackjack!"))
 time.sleep(1.5)
+
 
 # While loop will repeat until user inputs 4 in menu
 # ui_* is short for user_input_*
@@ -89,7 +91,7 @@ while True:
             
             # stops game setup menu while loop
             game_setup_menu = False
-        
+            
         Player.update_highscores(player_highscores)
         
         # this will be the real gameplay loop!

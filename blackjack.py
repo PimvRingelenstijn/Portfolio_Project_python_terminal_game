@@ -33,6 +33,7 @@ class Blackjack():
             time.sleep(1)
         x = input(terminal_message("The cards are shuffeled and the dealer adds a spacer card somewhere around the top 70 cards.\nPress enter to continue."))
     
+    
     # create new 312 card list
     def create_card_stack(self):
         # create card stack of 6 * 52 cards (312 = regular casino card stack size)
@@ -41,6 +42,7 @@ class Blackjack():
             for card in self.card_deck_info.keys():
                 self.bj_card_stack.append(card)
         random.shuffle(self.bj_card_stack)
+      
         
     # create instance dict with info for use in game logic & highscores     
     def set_players_info(self):    
@@ -73,18 +75,14 @@ class Blackjack():
                 self.bj_player_info[player]["Print Message"] = [" " + player, "", "", "", "", "", ""]
             else:
                 self.bj_player_info[player]["Print Message"] = [player, "", "", "", "", "", ""]
-            
+
+          
     # clear data that needs to be reset per round
     def clear_players_info(self):
+        self.max_line_len_single_player = 0
+        self.bust_players = 0
+        
         for player, info in self.bj_player_info.items():
-            self.max_line_len_single_player = 0
-            self.bust_players = 0
-            
-            #removes player entries for split pair players
-            if player.endswith("_split"):
-                del self.bj_player_info[player]
-                continue
-            
             # resets print message Removes bet / No Blackjack! lines
             if len(player) % 2 == 0:
                 self.bj_player_info[player]["Print Message"] = [" " + player, "", "", "", "", "", ""]
@@ -121,7 +119,7 @@ class Blackjack():
             balance = self.bj_player_info[player]["Balance"]
             # ask player for amount they want to bet
             ui_betting_amount = input(terminal_message(f"Player {player}, you currently have ${balance}.\nHow much do you want to bet?", True))
-
+            
             # Catch non int inputs          
             try:
                 ui_betting_amount_int = int(ui_betting_amount)
@@ -300,7 +298,6 @@ class Blackjack():
                 info["Cards"].append(next_card)
         # reset line length output for single player games
         self.max_line_len_single_player = 0
-
 
         # perform all setup tasks for all players
         for player, info in self.bj_player_info.items():
@@ -756,16 +753,16 @@ class Blackjack():
             elif info["Print Message"][6].strip() == "BLACKJACK!":
                 summary_message_player[3] += "BLACKJACK!"
                 bj_win_lost_amount = int(info["Current Bet"] * 2.5)
-            # if player wins (dealer == bust OR dealer != bust < player score)
+            # if player wins (dealerscore == bust OR dealerscore != bust < player score)
             elif ((self.bj_player_info["Dealer"]["Card Score"] > 21 and info["Card Score"] <= 21) or 
                   (info["Card Score"] <= 21 and self.bj_player_info["Dealer"]["Card Score"] < info["Card Score"])):
                 summary_message_player[3] += "WIN"
                 bj_win_lost_amount = info["Current Bet"] * 2
-            # if player == dealer
+            # if playerscore == dealerscore
             elif info["Card Score"] <= 21 and self.bj_player_info["Dealer"]["Card Score"] == info["Card Score"]:
                 summary_message_player[3] += "PUSH"
                 bj_win_lost_amount = info["Current Bet"]
-            # if player lose
+            # else player loses
             else:
                 summary_message_player[3] += "LOSE"
                 bj_win_lost_amount = -1 * info["Current Bet"]
@@ -814,6 +811,11 @@ class Blackjack():
                         summary_message[i] += " " * (num_ws + 1) + summary_message_player[i] + " " * num_ws
                 if player_index < len(self.bj_player_info):
                         summary_message[i] += " | "
+        
+        # removing "_split" players
+        split_player_remove = [key for key in self.bj_player_info if "_split" in key]
+        for player in split_player_remove:
+            del self.bj_player_info[player]
         
         x = input(terminal_message("\n".join(summary_message), True)) 
             
@@ -875,7 +877,7 @@ class Blackjack():
         broke_players = []
         player_index_message = 1
         for player, info in self.bj_player_info.items():
-            if player == "Dealer" or player.endswith("_split"): 
+            if player == "Dealer": 
                 player_index_message += 1
                 continue
             balance = info["Balance"]
